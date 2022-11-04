@@ -2,6 +2,14 @@
     min-height: 32rem;
 }
 
+.hide {
+    display: none;
+}
+
+.show {
+    display: inline;
+}
+
 #get-box {
     height: 15rem;
     background-color: rgb(189, 215, 255);

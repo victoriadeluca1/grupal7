@@ -7,25 +7,70 @@ let btnBusqueda = document.getElementById("btnGet1");
 let inputNameAgregar = document.getElementById("inputPostNombre");
 let inputLastNameAgregar = document.getElementById("inputPostApellido");
 let btnAgregar = document.getElementById("btnPost");
+let btnmodificar=document.getElementById("btnPut");
+let inputModificar = document.getElementById("inputPutId");
+let btnEliminar=document.getElementById("btnDelete");
+let inputEliminar = document.getElementById("inputDelete");
+let inputNamemodal = document.getElementById("inputPutNombre");
+let inputLastNamemodal = document.getElementById("inputPutApellido");
+let modal = document.getElementById("dataModal");
+
+btnmodificar.addEventListener("click", async function() {
+  let modificarValue = inputModificar.value;
+  localStorage.setItem("dataModificar", modificarValue);
+
+  const jsonData = await fetch(URL + `/${modificarValue}`).then((response) => response.json());
+console.log(jsonData);
+
+  inputNamemodal.value = jsonData.name;
+  console.log(jsonData.name)
+
+  inputLastNamemodal.value = jsonData.lastname;
+
+});
 
 async function updateList() {
   const jsonData = await fetch(URL).then((response) => response.json());
   showUsers(jsonData);
 }
 
+//GET
 async function buscar() {
   const idbusqueda = inputBusqueda.value;
 
   if (idbusqueda == "") {
     let jsonData = await fetch(URL).then((response) => response.json());
     showUsers(jsonData);
-  } else {
-    let jsonData = await fetch(URL + `/${idbusqueda}`).then((response) => response.json());
-    showUsers([jsonData])
-  }
-}
 
-//Muestra las categorias en el html
+  }
+  else {
+    let jsonData = await fetch(URL + `/${idbusqueda}`).then((response) => response.json());
+  
+
+    if (jsonData.ok === false) {
+      let alerta = document.getElementById("alerta")
+      alerta.classList.remove("hide");
+      alerta.classList.add("show");
+
+      setTimeout(function () {
+        
+        alerta.classList.remove("show");
+        alerta.classList.add("hide");
+      }, "3000")
+          
+
+          // updateList()
+    }
+    else {
+      showUsers([jsonData])
+    }
+  }
+
+   inputBusqueda.value = "";
+};
+
+
+//Muestra la lista en el HTML
 function showUsers(array) {
 
   let htmlContentToAppend = "";
@@ -50,13 +95,73 @@ function showUsers(array) {
   document.getElementById("results").innerHTML = htmlContentToAppend;
 }
 
-function habilitarBTN() {
-  if (inputLastNameAgregar.value === "" && inputLastNameAgregar.value === "") {
-    btnAgregar.removeAttribute("disabled", true);
+
+function habilitarBTN(){
+  if (inputLastNameAgregar.value!== "" && inputLastNameAgregar.value !== "") {
+    btnAgregar.disabled = false;
   } else {
-    btnAgregar.removeAttribute("disabled", false);
+    btnAgregar.disabled = true;
   }
+   if (inputModificar.value !== "") {
+     btnmodificar.disabled = false;
+  
+   } else {
+     btnmodificar.disabled = true;
+   }
+   if (inputDelete.value !== "") {
+     btnDelete.disabled = false;
+   } else {
+     btnDelete.disabled = true;
+   }
+  }
+
+
+  //DELETE
+async function borrar() {
+ let idBorrar = inputEliminar.value;
+
+ const res = await fetch(URL + `/${idBorrar}`, {
+  method: 'DELETE',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+});
+
+if (res.ok === false) {
+  console.error('Hubo un error al hacer la petición');
+  return;
 }
+
+updateList();
+ inputEliminar.value = "";
+}
+
+
+async function modificar() {
+ let datos = {name: inputNamemodal.value, lastname: inputLastNamemodal.value};
+ 
+ let id = localStorage.getItem('dataModificar')
+
+ const res = await fetch(URL + `/${id}`, {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(datos)
+});
+
+if (res.ok === false) {
+  console.error('Hubo un error al hacer la petición');
+  return;
+}
+
+await updateList(); //actualiza la lista con la informacion del servidor
+inputNamemodal.value = "";
+inputLastNamemodal.value = "";
+inputModificar.value = ""; 
+btnmodificar.disabled = true;
+
+};
 
 //POST
 btnAgregar.addEventListener("click", async function () {
@@ -82,7 +187,3 @@ btnAgregar.addEventListener("click", async function () {
   inputNameAgregar.value = "";
   inputLastNameAgregar.value = "";
 });
-
-
-
-//INPUTS
