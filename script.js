@@ -45,7 +45,7 @@ async function buscar() {
 
   if (idbusqueda == "") {
     updateList();
-  }
+  }else{
   jsonData.forEach(element => {
     id = element.id;
     ids.push(id);
@@ -66,7 +66,7 @@ async function buscar() {
     }, "3000")
     //console.log("noexistewey")
   }
-
+  }
   inputBusqueda.value = "";
 };
 
